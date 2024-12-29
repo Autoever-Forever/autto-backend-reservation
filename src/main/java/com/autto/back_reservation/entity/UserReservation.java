@@ -23,6 +23,8 @@ public class UserReservation {
 
     private Date ticketDate;
 
+    private int reservedSeatsCount; // 예약 좌석 수
+
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdDate;
 
@@ -43,6 +45,7 @@ public class UserReservation {
         reservation.userId = UUID.fromString(dto.getUserId());
         reservation.productId = UUID.fromString(dto.getProductId());
         reservation.ticketDate = date;
+        reservation.reservedSeatsCount = dto.getCount(); // 예약 좌석 수
         reservation.createdDate = new Date(); // 현재 시간
         reservation.lastUpdate = new Date(); // 초기 생성 시간과 동일
         reservation.status = ReservationStatus.BOOKED; // 기본 상태 설정
