@@ -1,5 +1,6 @@
 package com.autto.autto_reservation.entity;
 
+import com.autto.autto_reservation.dto.ReservationRequest;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -54,4 +55,14 @@ public class UserReservation {
         ACTIVE,
         INACTIVE
     }
+
+    // dto to Entity
+    public UserReservation(ReservationRequest reservationRequest) {
+        this.userId = UUID.fromString(reservationRequest.getUserId());
+        this.productId = UUID.fromString(reservationRequest.getProductId());
+        this.seatId = UUID.fromString(reservationRequest.getSeatId());
+        this.seatCount = reservationRequest.getSeatCount();
+        this.status = ReservationStatus.ACTIVE;
+    }
+
 }

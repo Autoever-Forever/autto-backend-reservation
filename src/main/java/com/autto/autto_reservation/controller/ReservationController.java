@@ -3,14 +3,14 @@ package com.autto.autto_reservation.controller;
 import com.autto.autto_reservation.dto.ApiResponse;
 import com.autto.autto_reservation.dto.CancelReservationInfo;
 import com.autto.autto_reservation.dto.ReservationList;
+import com.autto.autto_reservation.dto.ReservationRequest;
+import com.autto.autto_reservation.exception.SeatNotAvailableException;
 import com.autto.autto_reservation.service.ReservationService;
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -40,6 +40,26 @@ public class ReservationController {
             CancelReservationInfo cancelReservationInfo = reservationService.getCancelReservation(reservationId);
             return ResponseEntity.ok(ApiResponse.success("예약 취소 페이지 조회 성공", cancelReservationInfo));
         } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.failure("GENERAL_ERROR", "예기치 못한 오류 발생: " + e.getMessage()));
+        }
+    }
+
+    // 예약 생성
+    @PostMapping
+    public ResponseEntity<ApiResponse<String>> createReservation(@RequestBody ReservationRequest reservationRequest){
+        try{
+            reservationService.createReservation(reservationRequest);
+            return ResponseEntity.ok(ApiResponse.success("예약 완료", null));
+        } catch (SeatNotAvailableException e) {
+            // 남은 좌석이 없는 경우
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST) // 400 Bad Request
+                    .body(ApiResponse.failure("SEAT_UNAVAILABLE", e.getMessage()));
+        } catch (FeignException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.failure("EXTERNAL_API_ERROR", "API 호출 실패: " + e.getMessage()));
+        }
+        catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ApiResponse.failure("GENERAL_ERROR", "예기치 못한 오류 발생: " + e.getMessage()));
         }
