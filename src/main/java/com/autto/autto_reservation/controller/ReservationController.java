@@ -47,9 +47,9 @@ public class ReservationController {
 
     // 예약 생성
     @PostMapping
-    public ResponseEntity<ApiResponse<String>> createReservation(@RequestBody ReservationRequest reservationRequest){
+    public ResponseEntity<ApiResponse<String>> createReservation(@RequestAttribute("userId") String userId, @RequestBody ReservationRequest reservationRequest){
         try{
-            reservationService.createReservation(reservationRequest);
+            reservationService.createReservation(reservationRequest, userId);
             return ResponseEntity.ok(ApiResponse.success("예약 완료", null));
         } catch (SeatNotAvailableException e) {
             // 남은 좌석이 없는 경우

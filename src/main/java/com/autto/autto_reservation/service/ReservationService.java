@@ -35,9 +35,9 @@ public class ReservationService {
     }
 
     @Transactional
-    public void createReservation(ReservationRequest reservationRequest){
-
+    public void createReservation(ReservationRequest reservationRequest, String userId){
         // 예약하기
+        reservationRequest.setUserId(userId);
         UserReservation reservation = new UserReservation(reservationRequest);
         reservationRepository.save(reservation);
 
