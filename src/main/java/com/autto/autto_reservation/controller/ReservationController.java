@@ -8,8 +8,10 @@ import com.autto.autto_reservation.exception.SeatNotAvailableException;
 import com.autto.autto_reservation.service.ReservationService;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -65,4 +67,16 @@ public class ReservationController {
         }
     }
 
+    // 예약 취소
+    @DeleteMapping("/{reservationId}")
+    public ResponseEntity<ApiResponse<String>> cancelReservation(@PathVariable("reservationId") String reservationId) throws Exception {
+        try{
+            reservationService.cancelReservation(reservationId);
+            return ResponseEntity.ok(ApiResponse.success("예약 취소 성공", null));
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.failure("GENERAL_ERROR", "예기치 못한 오류 발생: " + e.getMessage()));
+        }
+    }
 }

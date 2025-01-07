@@ -5,7 +5,11 @@ import com.autto.autto_reservation.dto.*;
 import com.autto.autto_reservation.entity.UserReservation;
 import com.autto.autto_reservation.exception.SeatNotAvailableException;
 import com.autto.autto_reservation.repository.ReservationRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +22,10 @@ public class ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final ReservationServiceFeignClient productApi;
+
+    private final KafkaTemplate<String, String> kafkaTemplate;
+    @Value("${kafka.topic.name}")
+    private String topic;
 
     // 사용자 예약 조회 API
     public List<ReservationList> getReservationList(String userId) throws Exception {
@@ -50,4 +58,30 @@ public class ReservationService {
         }
     }
 
+    //예약 취소
+    @Transactional
+    public void cancelReservation(String reservationId) throws Exception {
+        UserReservation reservation = reservationRepository.findById(UUID.fromString(reservationId))
+                .orElseThrow(() -> new Exception("예약을 찾을 수 없습니다: " + reservationId));
+
+        // 예약취소
+        reservation.changeStatusInactive();
+        reservationRepository.save(reservation);
+
+        // Kafka Producer를 통해 메시지 발행
+        sendReservationCancelMessage(topic, reservation);
+    }
+
+    // 메시지 발행
+    public void sendReservationCancelMessage(String topic, UserReservation reservation) throws JsonProcessingException {
+            ReservationKafkaMessage message = new ReservationKafkaMessage(
+                    reservation.getSeatId(),
+                    reservation.getSeatCount()
+            );
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            String jsonMessage = objectMapper.writeValueAsString(message);
+
+            kafkaTemplate.send(topic, jsonMessage);
+    }
 }
