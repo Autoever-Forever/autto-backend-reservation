@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.UUID;
 
@@ -24,17 +26,16 @@ public class UserReservation {
 
     private int seatCount;
 
+    @Temporal(TemporalType.TIMESTAMP)
+    private LocalDateTime createdDate;
 
     @Temporal(TemporalType.TIMESTAMP)
-    private Date createdDate;
-
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date lastUpdate;
+    private LocalDateTime lastUpdate;
 
     @PrePersist
     public void prePersist(){
-        createdDate = new Date();
-        lastUpdate = new Date();
+        createdDate = LocalDateTime.now();
+        lastUpdate = LocalDateTime.now();
 
         if (this.id == null) {
             this.id = UUID.randomUUID();
@@ -43,7 +44,7 @@ public class UserReservation {
 
     @PreUpdate
     public void preUpdate() {
-        lastUpdate = new Date();
+        lastUpdate = LocalDateTime.now();
     }
 
     @Enumerated(EnumType.STRING)
