@@ -18,7 +18,7 @@ public interface ReservationRepository extends JpaRepository<UserReservation, UU
             "FROM UserReservation r WHERE r.userId = :userId")
     List<ReservationList> findReservationsByUserId(@Param("userId") UUID userId);
 
-    @Query("SELECT new com.autto.autto_reservation.dto.CancelReservationInfo(r.seatId, r.seatCount) " +
+    @Query("SELECT new com.autto.autto_reservation.dto.CancelReservationInfo(r.seatId, r.seatCount, r.status) " +
             "FROM UserReservation r WHERE r.id = :reservationId")
     CancelReservationInfo findReservationById(@Param("reservationId") UUID reservationId);
 }
