@@ -66,4 +66,8 @@ public class UserReservation {
         this.status = ReservationStatus.ACTIVE;
     }
 
+    // 상태 변경 메서드
+    public void changeStatusInactive() {
+        this.status = ReservationStatus.INACTIVE;
+    }
 }
