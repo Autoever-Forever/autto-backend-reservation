@@ -1,0 +1,48 @@
+# server
+server:
+  port: ${SERVER_PORT:8083} 
+
+
+spring:
+  application:
+    name: autto-reservation
+  
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:ReservationDB}?allowPublicKeyRetrieval=true&useSSL=false
+    username: ${MYSQL_USER:root}
+    password: ${MYSQL_PASSWORD:1234}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+  
+  kafka:
+    bootstrap-servers: ${KAFKA_SERVERS:localhost:9093}
+    consumer:
+      group-id: ${KAFKA_CONSUMER_GROUP:inventory-group}
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+  
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:prod}
+
+reservation:
+  service:
+    url: ${RESERVATION_SERVICE_URL:localhost:8084}
+
+jwt:
+  secret: ${JWT_SECRET:64461f01e1af406da538b9c48d801ce59142452199ff112fb5404c8e7e98e3ff}
+
+kafka:
+  topic:
+    name: ${KAFKA_TOPIC:inventory-events}

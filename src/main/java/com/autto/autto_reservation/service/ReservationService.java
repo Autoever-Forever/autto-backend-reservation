@@ -8,6 +8,7 @@ import com.autto.autto_reservation.repository.ReservationRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 
+import static org.hibernate.query.sqm.tree.SqmNode.log;
+
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class ReservationService {
@@ -70,6 +74,7 @@ public class ReservationService {
 
         // Kafka Producer를 통해 메시지 발행
         sendReservationCancelMessage(topic, reservation);
+        log.info("메시지 발송 성공");
     }
 
     // 메시지 발행

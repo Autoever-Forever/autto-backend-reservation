@@ -1,0 +1,26 @@
+# Gradle 관련 파일
+.gradle/
+build/
+out/
+*.log
+*.md
+*.iml
+.idea/
+
+# 테스트 관련 파일
+src/test/
+src/integration-test/
+
+# 환경 설정 파일 (필요에 따라)
+*.properties
+*.yml
+
+# IDE 설정 파일
+*.class
+*.jar
+*.war
+
+# 기타
+.DS_Store
+*.swp
+*.swo
