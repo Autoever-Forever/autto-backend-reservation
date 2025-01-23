@@ -24,6 +24,5 @@ COPY --from=builder /build/build/libs/*.jar app.jar
 # EXPOSE로 컨테이너가 사용할 포트를 열어줍니다.
 EXPOSE 8080
 EXPOSE 8084
-
 # ENTRYPOINT에서 환경 변수를 사용하여 Java 애플리케이션 실행
 ENTRYPOINT ["java", "-jar", "-Dspring.profiles.active=${SPRING_PROFILES_ACTIVE}", "app.jar"]
