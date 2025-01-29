@@ -41,3 +41,5 @@ jwt:
 kafka:
   topic:
     name: ${KAFKA_TOPIC:inventory-events}
+server:
+  port: ${SEVER_PORT:8080}
