@@ -13,23 +13,30 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Table(name = "user_reservation")
 public class UserReservation {
 
     @Id
     private UUID id;
 
+    @Column(name = "user_id")
     private UUID userId;
 
+    @Column(name = "product_id")
     private UUID productId;
 
+    @Column(name = "seat_id")
     private UUID seatId;
 
+    @Column(name = "seat_count")
     private int seatCount;
 
     @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "created_date")
     private LocalDateTime createdDate;
 
     @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "last_update")
     private LocalDateTime lastUpdate;
 
     @PrePersist
@@ -48,6 +55,7 @@ public class UserReservation {
     }
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "status")
     private ReservationStatus status;
 
     // 예약, 예약취소

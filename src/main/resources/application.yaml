@@ -1,3 +1,7 @@
+app:
+  cors:
+    allowedOrigins: ${ALLOWED_ORIGINS:http://localhost:3000,http://localhost:8080}
+
 spring:
   application:
     name: autto-reservation

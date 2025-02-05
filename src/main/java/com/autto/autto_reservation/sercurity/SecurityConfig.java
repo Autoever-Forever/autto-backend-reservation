@@ -2,6 +2,7 @@ package com.autto.autto_reservation.sercurity;
 
 
 import org.apache.catalina.filters.CorsFilter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -18,6 +19,9 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
 
     private final JwtTokenUtil jwtTokenUtil;
+
+    @Value("${app.cors.allowedOrigins}")
+    private String allowedOrigins;
 
     public SecurityConfig(JwtTokenUtil jwtTokenUtil) {
         this.jwtTokenUtil = jwtTokenUtil;
@@ -36,7 +40,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.addAllowedOrigin("http://localhost:3000");  // React 앱의 URL
+        configuration.addAllowedOrigin(allowedOrigins);  // React 앱의 URL
         configuration.addAllowedMethod("*");  // 모든 HTTP 메소드 허용
         configuration.addAllowedHeader("*");  // 모든 HTTP 헤더 허용
         configuration.setAllowCredentials(true);  // 자격 증명(쿠키 등)을 허용
