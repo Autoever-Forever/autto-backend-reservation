@@ -8,10 +8,13 @@ variables:
   GITLAB_TOKEN: "$CI_JOB_TOKEN"  # GitLab CI 환경 변수에서 자동으로 제공되는 토큰
   GITLAB_USERNAME: root # push 작업을 수행할 GitLab 유저명
   CHARTNAME: reservation-service
+  HARBOR_USERNAME: admin
   # GITLAB_URL  # GitLab 주소 - secret variable 에 정의
   # DOCKERHUB_PASSWORD # DOCKERHUB 비밀번호 - secret variable 에 정의
   # GITLAB_CHART_REPO  # Helm 차트의 GitLab 레포지토리 이름 - secret variable 에 정의
   # GITLAB_EMAIL # push 작업을 수행할 GitLab 유저의 이메일 - secret variable 에 정의
+  # HARBOR_URL # 하버 이미지 레지스트리 주소 - sercret variable 에 정의
+  # HARBOR_PASSWORD # 하버 계정 비밀번호 - sercret variable 에 정의
 
 # main 브랜치에서만 파이프라인 실행
 workflow:
@@ -22,6 +25,7 @@ stages:
   - organize # 이미지 정리
   - build # 이미지 빌드
   - push_dockerhub # 이미지 도커 허브에 푸쉬
+  - push_harbor # 이미지 하버에 푸시
   - clone_helm # 헬름차트 클론
   - update_helm # 헬름차트 업데이트
 
@@ -63,6 +67,14 @@ image_push_dockerhub:
     reports:
       dotenv: build.env
 
+image_push_harbor:
+  stage: push_harbor
+  script:
+    - echo "📤 Pushing $IMAGE image to Harbor..."
+    - docker login ${HARBOR_URL} -u ${HARBOR_USERNAME} -p ${HARBOR_PASSWORD}
+    - docker tag $DOCKER_IMAGE ${HARBOR_URL}/${DOCKERHUB_REPO}:${IMAGE_TAG}
+    - docker push ${HARBOR_URL}/${DOCKERHUB_REPO}:${IMAGE_TAG}
+    
 checkout_helm_chart:
   stage: clone_helm
   script:
