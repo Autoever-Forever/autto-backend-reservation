@@ -29,6 +29,7 @@ image_organize:
   stage: organize
   script:
     - docker image prune -a -f # 사용하지 않는 이미지 정리
+    - docker system prune -a -f # 전체 불필요한 Docker 자원 정리
 
 image_build:
   stage: build
