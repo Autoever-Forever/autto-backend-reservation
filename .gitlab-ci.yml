@@ -48,7 +48,7 @@ image_push_dockerhub:
     - IMAGE=${DOCKERHUB_REPO}:${IMAGE_TAG}
 
     # 이미지 변수를 전역 범위로 저장
-    - echo "IMAGE_TAG=${IMAGE_TAG}" >> reservation-build.env
+    - echo "IMAGE_TAG=${IMAGE_TAG}" >> build.env
 
     # Docker 로그인
     - echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
@@ -60,7 +60,7 @@ image_push_dockerhub:
 
   artifacts:
     reports:
-      dotenv: reservation-build.env
+      dotenv: build.env
 
 checkout_helm_chart:
   stage: clone_helm
