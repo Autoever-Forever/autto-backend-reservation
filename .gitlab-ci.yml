@@ -7,6 +7,7 @@ variables:
   DOCKERHUB_USERNAME: "auttto"
   GITLAB_TOKEN: "$CI_JOB_TOKEN"  # GitLab CI 환경 변수에서 자동으로 제공되는 토큰
   GITLAB_USERNAME: root # push 작업을 수행할 GitLab 유저명
+  CHARTNAME: reservation-service
   # GITLAB_URL  # GitLab 주소 - secret variable 에 정의
   # DOCKERHUB_PASSWORD # DOCKERHUB 비밀번호 - secret variable 에 정의
   # GITLAB_CHART_REPO  # Helm 차트의 GitLab 레포지토리 이름 - secret variable 에 정의
@@ -77,7 +78,7 @@ update_helm_chart:
   stage: update_helm
   script:
     - echo "📝 Updating values.yaml with new tag 👉🏻$IMAGE_TAG👈🏻"
-    - cd $GITLAB_CHART_REPO/user-service
+    - cd $GITLAB_CHART_REPO/$CHARTNAME
 
     # git 유저 등록
     - git config --global user.email ${GITLAB_EMAIL}
