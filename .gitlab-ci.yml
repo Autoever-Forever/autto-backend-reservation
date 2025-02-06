@@ -67,12 +67,12 @@ checkout_helm_chart:
   script:
     - echo "📥 Cloning Helm Chart repository from GitLab..."
     - git clone http://gitlab-ci-token:${HELM_TOKEN}@${GITLAB_URL}/${GITLAB_CHART_REPO}.git # GitLab 토큰으로 인증 후 clone
-  artifacts:
-    paths:
-      - /home/gitlab-runner/builds/t1_6-j5m/0/autto/backend-user/charts/
   # image_push_dockerhub 에서 정의한 환경변수 사용
   dependencies:
     - image_push_dockerhub
+  artifacts:
+    paths:
+      - /home/gitlab-runner/builds/t1_6-j5m/0/autto/backend-user/charts/
 
 update_helm_chart:
   stage: update_helm
