@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 public interface ReservationServiceFeignClient {
 
     // 재고 업데이트 API
-    @GetMapping("/api/v1/seats/validate")
+    @GetMapping("/admin/api/v1/seats/validate")
     InventoryValidationResponse updateSeats(@RequestBody InventoryValidationRequest checkInventory);
 
 }
