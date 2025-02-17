@@ -54,12 +54,12 @@ public class ReservationService {
         UserReservation userReservation = reservationRepository.save(reservation);
 
         // 재고 업데이트(API)
-//        InventoryValidationRequest checkInventory = new InventoryValidationRequest(reservationRequest.getSeatId(), reservationRequest.getSeatCount());
-//
-//        InventoryValidationResponse updateResponse = productApi.updateSeats(checkInventory);
-//        if(!updateResponse.getSuccess()){
-//            throw new SeatNotAvailableException("좌석 수 업데이트에 실패하였습니다: " + updateResponse);
-//        }
+        InventoryValidationRequest checkInventory = new InventoryValidationRequest(reservationRequest.getSeatId(), reservationRequest.getSeatCount());
+
+        InventoryValidationResponse updateResponse = productApi.updateSeats(checkInventory);
+        if(!updateResponse.getSuccess()){
+            throw new SeatNotAvailableException("좌석 수 업데이트에 실패하였습니다: " + updateResponse);
+        }
 
         return userReservation;
     }
