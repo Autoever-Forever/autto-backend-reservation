@@ -1,0 +1,110 @@
+image: ubuntu:latest
+
+variables:
+  DOCKER_IMAGE: "reservationservice-image:latest"
+  REGISTRY_URL: "docker.io"
+  DOCKERHUB_REPO: "auttto/reservation-service"
+  DOCKERHUB_USERNAME: "auttto"
+  GITLAB_TOKEN: "$CI_JOB_TOKEN"  # GitLab CI 환경 변수에서 자동으로 제공되는 토큰
+  GITLAB_USERNAME: root # push 작업을 수행할 GitLab 유저명
+  CHARTNAME: reservation-service
+  HARBOR_USERNAME: admin
+  # GITLAB_URL  # GitLab 주소 - secret variable 에 정의
+  # DOCKERHUB_PASSWORD # DOCKERHUB 비밀번호 - secret variable 에 정의
+  # GITLAB_CHART_REPO  # Helm 차트의 GitLab 레포지토리 이름 - secret variable 에 정의
+  # GITLAB_EMAIL # push 작업을 수행할 GitLab 유저의 이메일 - secret variable 에 정의
+  # HARBOR_URL # 하버 이미지 레지스트리 주소 - sercret variable 에 정의
+  # HARBOR_PASSWORD # 하버 계정 비밀번호 - sercret variable 에 정의
+
+# main 브랜치에서만 파이프라인 실행
+workflow:
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+
+stages:
+  - organize # 이미지 정리
+  - build # 이미지 빌드
+  - push_dockerhub # 이미지 도커 허브에 푸쉬
+  - push_harbor # 이미지 하버에 푸시
+  - clone_helm # 헬름차트 클론
+  - update_helm # 헬름차트 업데이트
+
+image_organize:
+  stage: organize
+  script:
+    - docker image prune -a -f # 사용하지 않는 이미지 정리
+    - docker system prune -a -f # 전체 불필요한 Docker 자원 정리
+
+image_build:
+  stage: build
+  script:
+    - echo "Building Docker image..."
+    - docker build -t $DOCKER_IMAGE .
+
+image_push_dockerhub:
+  stage: push_dockerhub
+  script:
+    # 가장 최근 태그를 가져오기
+    - git fetch --tags --force
+    - VERSION_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "0.0.0") # 태그가 없다면 기본 0.0.0 태그 부여
+
+    # 이미지 태그 부여
+    - IMAGE_TAG=${VERSION_TAG}.${CI_PIPELINE_ID}
+    - IMAGE=${DOCKERHUB_REPO}:${IMAGE_TAG}
+
+    # 이미지 변수를 전역 범위로 저장
+    - echo "IMAGE_TAG=${IMAGE_TAG}" >> build.env
+
+    # Docker 로그인
+    - echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+    
+    # 태깅 및 푸시
+    - echo "📤 Pushing $IMAGE image to DockerHub..."
+    - docker tag $DOCKER_IMAGE $IMAGE
+    - docker push $IMAGE
+
+  artifacts:
+    reports:
+      dotenv: build.env
+
+image_push_harbor:
+  stage: push_harbor
+  script:
+    - echo "📤 Pushing $IMAGE image to Harbor..."
+    - echo "$HARBOR_PASSWORD" | docker login ${HARBOR_URL} -u ${HARBOR_USERNAME} --password-stdin 
+    - docker tag $DOCKER_IMAGE ${HARBOR_URL}/${DOCKERHUB_REPO}:${IMAGE_TAG}
+    - docker push ${HARBOR_URL}/${DOCKERHUB_REPO}:${IMAGE_TAG}
+    
+checkout_helm_chart:
+  stage: clone_helm
+  script:
+    - echo "📥 Cloning Helm Chart repository from GitLab..."
+    - git clone http://gitlab-ci-token:${HELM_TOKEN}@${GITLAB_URL}/${GITLAB_CHART_REPO}.git # GitLab 토큰으로 인증 후 clone
+  artifacts:
+    paths:
+      - charts/
+  # image_push_dockerhub 에서 정의한 환경변수 사용
+  dependencies:
+    - image_push_dockerhub
+
+update_helm_chart:
+  stage: update_helm
+  script:
+    - echo "📝 Updating values.yaml with new tag 👉🏻$IMAGE_TAG👈🏻"
+    - cd $GITLAB_CHART_REPO/$CHARTNAME
+
+    # git 유저 등록
+    - git config --global user.email ${GITLAB_EMAIL}
+    - git config --global user.name ${GITLAB_USERNAME}
+    
+    - git checkout main
+    - yq -i ".image.tag = \"${IMAGE_TAG:-latest}\"" values.yaml # values 파일의 사용 이미지 태그 변경
+    - yq -i ".appVersion = \"${IMAGE_TAG:-latest}\"" Chart.yaml # Chart 파일의 앱 버전 태그 변경
+    - git add values.yaml
+    - git add Chart.yaml
+    - git commit -m "AF-145 cicd:이미지 버전 변경 - $IMAGE_TAG"
+    - git push http://gitlab-ci-token:${HELM_TOKEN}@${GITLAB_URL}/${GITLAB_CHART_REPO}.git main
+  # image_push_dockerhub 에서 정의한 환경변수 사용
+  dependencies:
+    - checkout_helm_chart
+    - image_push_dockerhub
