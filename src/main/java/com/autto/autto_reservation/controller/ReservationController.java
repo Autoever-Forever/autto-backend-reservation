@@ -4,6 +4,7 @@ import com.autto.autto_reservation.dto.ApiResponse;
 import com.autto.autto_reservation.dto.CancelReservationInfo;
 import com.autto.autto_reservation.dto.ReservationList;
 import com.autto.autto_reservation.dto.ReservationRequest;
+import com.autto.autto_reservation.entity.UserReservation;
 import com.autto.autto_reservation.exception.SeatNotAvailableException;
 import com.autto.autto_reservation.service.ReservationService;
 import feign.FeignException;
@@ -15,6 +16,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 
 @RequiredArgsConstructor
@@ -49,10 +51,10 @@ public class ReservationController {
 
     // 예약 생성
     @PostMapping
-    public ResponseEntity<ApiResponse<String>> createReservation(@RequestAttribute("userId") String userId, @RequestBody ReservationRequest reservationRequest){
+    public ResponseEntity<ApiResponse<UserReservation>> createReservation(@RequestAttribute("userId") String userId, @RequestBody ReservationRequest reservationRequest){
         try{
-            reservationService.createReservation(reservationRequest, userId);
-            return ResponseEntity.ok(ApiResponse.success("예약 완료", null));
+            UserReservation reservation = reservationService.createReservation(reservationRequest, userId);
+            return ResponseEntity.ok(ApiResponse.success("예약 완료", reservation));
         } catch (SeatNotAvailableException e) {
             // 남은 좌석이 없는 경우
             return ResponseEntity.status(HttpStatus.BAD_REQUEST) // 400 Bad Request
