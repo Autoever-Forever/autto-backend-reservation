@@ -47,11 +47,11 @@ public class ReservationService {
     }
 
     @Transactional
-    public void createReservation(ReservationRequest reservationRequest, String userId){
+    public UserReservation createReservation(ReservationRequest reservationRequest, String userId){
         // 예약하기
         reservationRequest.setUserId(userId);
         UserReservation reservation = new UserReservation(reservationRequest);
-        reservationRepository.save(reservation);
+        UserReservation userReservation = reservationRepository.save(reservation);
 
         // 재고 업데이트(API)
         InventoryValidationRequest checkInventory = new InventoryValidationRequest(reservationRequest.getSeatId(), reservationRequest.getSeatCount());
@@ -60,6 +60,8 @@ public class ReservationService {
         if(!updateResponse.getSuccess()){
             throw new SeatNotAvailableException("좌석 수 업데이트에 실패하였습니다: " + updateResponse);
         }
+
+        return userReservation;
     }
 
     //예약 취소

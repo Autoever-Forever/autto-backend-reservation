@@ -15,7 +15,7 @@ import java.util.UUID;
 public interface ReservationRepository extends JpaRepository<UserReservation, UUID> {
 
     @Query("SELECT new com.autto.autto_reservation.dto.ReservationList(r.id, r.createdDate, r.status, r.seatId) " +
-            "FROM UserReservation r WHERE r.userId = :userId")
+            "FROM UserReservation r WHERE r.userId = :userId ORDER BY r.createdDate DESC")
     List<ReservationList> findReservationsByUserId(@Param("userId") UUID userId);
 
     @Query("SELECT new com.autto.autto_reservation.dto.CancelReservationInfo(r.seatId, r.seatCount, r.status) " +
